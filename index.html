@@ -1110,6 +1110,10 @@ svg{display:block}
 /* menus */
 .fmenu{position:fixed;z-index:60;width:220px;background:#fff;border:1px solid #D4D4D7;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 20px rgba(0,0,0,.08);padding:4px}
 .fmenu .mi{cursor:pointer;gap:10px}.fmenu .mi.dn{color:#B91C1C}
+/* dropdown list option — long vendor names wrap to a second line (as in the live app's DropdownContent) instead of being clipped, and the picked one carries a brand tick */
+.fmenu .mi.ddopt{height:auto;min-height:36px;align-items:flex-start;white-space:normal;line-height:1.35;padding:9px 12px}
+.fmenu .mi.ddopt.sel{background:transparent;font-weight:500}
+.fmenu .mi.ddopt .ddtick{width:16px;height:16px;flex:0 0 16px;margin-left:auto;margin-top:2px}
 .fmenu .mh2{font-size:12px;color:#71717A;padding:8px 12px 4px}
 /* drawer extras */
 #vBai aside.mp{width:600px!important;display:flex;flex-direction:column}
@@ -1150,18 +1154,25 @@ svg{display:block}
 /* modal form (vendor-style floating labels) */
 .mx{width:560px}
 .mbd2{padding:4px 24px 8px;overflow-y:auto}
-.mbd2 h4{font-size:15px;font-weight:600;margin:18px 0 4px;color:#18181A}
-.mbd2 .hs{font-size:13px;color:#71717A;margin:0 0 12px}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
-.fl{position:relative;border:1px solid #D4D4D7;border-radius:4px;background:#fff;height:48px;padding:6px 10px 0}
-.fl.full{grid-column:1/-1}
-.fl label{display:block;font-size:12px;color:#71717A;line-height:14px}.fl label i{color:#DC2626;font-style:normal}
-.fl input,.fl select{border:0;outline:0;width:100%;font:inherit;font-size:14px;color:#18181A;background:transparent;padding:2px 0 0;appearance:none;-webkit-appearance:none}
-.fl select{cursor:pointer}
-.fl .dd{position:absolute;right:10px;top:16px;width:14px;height:14px;color:#52525B;pointer-events:none}
-.fl:focus-within{border-color:#18181A}
-.fl.err{border-color:#DC2626}
-.fh{font-size:12px;color:#71717A;margin-top:4px}
+.mbd2 h4{font-size:16px;font-weight:500;margin:32px 0 16px;color:#18181A}
+.mbd2 h4:first-child{margin-top:8px}
+.mbd2 .hs{font-size:13px;color:#71717A;margin:-12px 0 12px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+/* floating-label field — matches the live app's InputFieldForDropdown: 58px tall, the label sits as a placeholder and shrinks up when the field has a value, the value truncates with an ellipsis */
+.ff{position:relative;box-sizing:border-box;height:58px;border:1px solid #D4D4D7;border-radius:4px;background:#fff;cursor:pointer;min-width:0}
+.ff.full{grid-column:1/-1}
+.ff:hover{border-color:#18181A}
+.ff.err{border-color:#EF4444}
+.ff.dis{background:#FAFAFA;cursor:not-allowed;border-color:#E4E4E7}
+.ff>label{position:absolute;left:12px;top:15px;font-size:16px;font-weight:400;color:#71717A;line-height:1.5;transition:transform .15s,font-size .15s,color .15s;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 44px)}
+.ff>label i{color:#DC2626;font-style:normal}
+.ff.filled>label,.ff.ffin:focus-within>label{transform:translateY(-9px);font-size:12px;color:#52525B}
+.ff.dis>label{color:#A1A1AA}
+.ff .ffv{padding:24px 32px 0 12px;font-size:16px;font-weight:300;color:#18181A;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ff.dis .ffv{color:#52525B}
+.ff .ffchev{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:#52525B;pointer-events:none}
+.ff.ffin input{position:absolute;inset:0;width:100%;border:0;outline:0;background:transparent;font:inherit;font-size:16px;font-weight:300;color:#18181A;padding:24px 12px 8px;box-sizing:border-box}
+.rgl{font-size:13px;color:#71717A;margin-bottom:10px}.rgl i{color:#DC2626;font-style:normal}
 .rg2{display:flex;gap:22px;margin:4px 0 2px;font-size:14px}
 .rg2 label{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
 .rad{width:16px;height:16px;border-radius:50%;border:1px solid #767676;display:inline-block;box-sizing:border-box;background:#fff}
@@ -1364,13 +1375,16 @@ const TODAY=new Date(2026,9,28);
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function d(s){const [dd,mm,yy]=s.split(' ');return new Date(2000+(+yy),MON.indexOf(mm),+dd)}
 function inr(n){const neg=n<0;n=Math.abs(n);let [i,f]=n.toFixed(2).split('.');let l=i.slice(-3),r=i.slice(0,-3);if(r)l=r.replace(/\B(?=(\d{2})+(?!\d))/g,',')+','+l;return (neg?'-':'')+'₹'+l+'.'+f}
-const BL={BE:{n:'BESCOM',full:'Bangalore Electricity Supply Company',c:['#FEF3C7','#92400E'],cat:'Electricity',st:'Karnataka'},
- MS:{n:'MSEDCL',full:'Maharashtra State Electricity Distribution',c:['#E0F2FE','#0369A1'],cat:'Electricity',st:'Maharashtra'},
- BW:{n:'BWSSB',full:'Bangalore Water Supply and Sewerage Board',c:['#E0E7FF','#4338CA'],cat:'Water',st:'Karnataka'},
- TP:{n:'Tata Power Mumbai',full:'Tata Power Company Ltd (Mumbai)',c:['#FCE7F3','#BE185D'],cat:'Electricity',st:'Maharashtra'},
- AB:{n:'Airtel Broadband',full:'Bharti Airtel Ltd – Broadband',c:['#DCFCE7','#15803D'],cat:'Broadband',st:'Delhi'},
- MG:{n:'Mahanagar Gas',full:'Mahanagar Gas Ltd',c:['#FFEDD5','#C2410C'],cat:'Gas',st:'Maharashtra'},
- JF:{n:'Jio Fiber',full:'Reliance Jio Infocomm – JioFiber',c:['#FEE2E2','#B91C1C'],cat:'Broadband',st:'Karnataka'}};
+/* params per biller, shaped like sku_master's biller_param: key -> billing_parameter, type -> dataType, min/max -> length bounds, optional -> N/Y. BE/MS/AB/JF/DH/DV lengths taken from sku_master; BW/TP/MG are not in the sheet's sampled rows and are placeholder single-param configs until their real sku_master rows are confirmed. */
+const BL={BE:{n:'BESCOM',full:'Bangalore Electricity Supply Company',c:['#FEF3C7','#92400E'],cat:'Electricity',st:'Karnataka',params:[{key:'param1',name:'Customer ID / Account ID',type:'NUMERIC',min:5,max:11,optional:false}]},
+ MS:{n:'MSEDCL',full:'Maharashtra State Electricity Distribution',c:['#E0F2FE','#0369A1'],cat:'Electricity',st:'Maharashtra',params:[{key:'param1',name:'Consumer No',type:'NUMERIC',min:12,max:12,optional:false},{key:'param2',name:'BU',type:'NUMERIC',min:4,max:4,optional:false}]},
+ BW:{n:'BWSSB',full:'Bangalore Water Supply and Sewerage Board',c:['#E0E7FF','#4338CA'],cat:'Water',st:'Karnataka',params:[{key:'param1',name:'RR Number',type:'ALPHANUMERIC',min:6,max:12,optional:false}]},
+ TP:{n:'Tata Power Mumbai',full:'Tata Power Company Ltd (Mumbai)',c:['#FCE7F3','#BE185D'],cat:'Electricity',st:'Maharashtra',params:[{key:'param1',name:'Consumer Number',type:'ALPHANUMERIC',min:9,max:10,optional:false}]},
+ AB:{n:'Airtel Broadband',full:'Bharti Airtel Ltd – Broadband',c:['#DCFCE7','#15803D'],cat:'Broadband',st:'ALL',params:[{key:'param1',name:'Landline Number with STD code',type:'NUMERIC',min:11,max:11,optional:false}]},
+ MG:{n:'Mahanagar Gas',full:'Mahanagar Gas Ltd',c:['#FFEDD5','#C2410C'],cat:'Gas',st:'Maharashtra',params:[{key:'param1',name:'Consumer Number',type:'ALPHANUMERIC',min:9,max:11,optional:false}]},
+ JF:{n:'Jio Fiber',full:'Reliance Jio Infocomm – JioFiber',c:['#FEE2E2','#B91C1C'],cat:'Broadband',st:'ALL',params:[{key:'param1',name:'ConsumerID',type:'NUMERIC',min:1,max:15,optional:false}]},
+ DH:{n:'DHBVN',full:'Dakshin Haryana Bijli Vitran Nigam',c:['#FEF9C3','#854D0E'],cat:'Electricity',st:'Haryana',params:[{key:'param1',name:'Account Number',type:'ALPHANUMERIC',min:9,max:12,optional:false},{key:'param2',name:'Mobile Number',type:'NUMERIC',min:10,max:10,optional:false}]},
+ DV:{n:'D VoiS Communications',full:'D VoiS Communications Private Ltd',c:['#F3E8FF','#6B21A8'],cat:'Broadband',st:'ALL',params:[{key:'param1',name:'Customer Id',type:'ALPHANUMERIC',min:1,max:30,optional:false},{key:'param2',name:'User Name',type:'ALPHANUMERIC',min:1,max:75,optional:true}]}};
 const MCAT={"Electricity": "Utilities \u2013 Power", "Water": "Utilities \u2013 Water", "Broadband": "Utilities \u2013 Internet", "Gas": "Utilities \u2013 Gas"};
 const ACCTS=[
  {id:'tb',name:'ICIC A/C xx9477',logo:'ICICI Bank',bal:100000000,ts:'10 Sep 26, 01:08 AM'},
@@ -1389,6 +1403,8 @@ let CONS=[
  {id:'c9',b:'MG',nick:'Andheri kitchen',num:'210011876',branch:'Mumbai',status:'active',active:true,meter:'Postpaid',conn:'LT',copy:true,bunit:'Retail West',cc:'Retail – West',exp:'Gas charges',added:'18 May 26'},
  {id:'c10',b:'BE',nick:'Indiranagar store (closed)',num:'9912055531',branch:'Bengaluru',status:'active',active:false,meter:'Postpaid',conn:'LT',copy:true,bunit:'Retail South',cc:'Retail – South',exp:'Electricity charges',added:'12 Mar 26',inactOn:'30 Sep 26'},
  {id:'c11',b:'JF',nick:'Old HSR office',num:'JF-8812207741',branch:'Bengaluru',status:'active',active:false,meter:'Postpaid',conn:'LT',copy:false,bunit:'Retail South',cc:'Bengaluru Operations',exp:'Internet charges',added:'01 Feb 26',inactOn:'15 Aug 26'}];
+/* hydrate each seeded consumer's dynamic param values from its biller's param config (param1 = existing num, param2 = existing bu if any) so existing vendors render the same way a freshly-added one would */
+CONS.forEach(c=>{const bl=BL[c.b];c.params=(bl.params||[]).map((p,i)=>({key:p.key,name:p.name,value:i===0?c.num:(i===1?(c.bu||''):'')}))});
 /* bill status: pa pending approval · pr pending review · rtp ready to pay · ip in payment · paid · rej */
 let BILLS=[
  {id:'u1',cons:'c4',no:'2610-889124',bd:'26 Oct 26',per:'20 Sep – 19 Oct 26',due:'30 Oct 26',amt:48210,early:47730,late:49540,status:'pa',on:ME,fetched:'26 Oct 26, 06:00 AM'},
@@ -1466,6 +1482,19 @@ const CHEVU='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
 
 /* ---------- helpers ---------- */
 const cons=id=>CONS.find(c=>c.id===id), bill=id=>BILLS.find(b=>b.id===id), pay=id=>PAYS.find(p=>p.id===id), acct=id=>ACCTS.find(a=>a.id===id);
+/* every param beyond the primary one (param1), formatted for inline display next to the consumer number — replaces the old hardcoded "· BU xxxx" string */
+const paramLine=c=>{const ps=(c.params||[]).slice(1).filter(p=>p.value);return ps.length?' · '+ps.map(p=>p.name+' '+p.value).join(' · '):''};
+/* single source of truth for every dropdown's option list in the Add Utility Vendor modal — read by both the modal's own render (label + disabled state) and the open/pick menu handlers, so they can never drift apart */
+function ddOptions(key,m){
+ if(key==='cat')return [['','Select category']].concat([...new Set(Object.values(BL).map(x=>x.cat))].map(x=>[x,x]));
+ /* Utility vendors are listed by category only. A vendor's state is a property of the vendor itself (sku_master: BESCOM = Karnataka, Airtel = nationwide), surfaced as a read-only field once the vendor is chosen — it is not a filter the user sets, so there is no State dropdown. */
+ if(key==='b')return m.cat?[['','Select utility vendor']].concat(Object.entries(BL).filter(([k,x])=>x.cat===m.cat).map(([k,x])=>[k,x.n+' – '+x.full])):[['','Select a category first']];
+ if(key==='branch')return [['','Select branch'],['Bengaluru','Bengaluru'],['Pune','Pune'],['Mumbai','Mumbai'],['Delhi','Delhi'],['Nashik','Nashik']];
+ if(key==='cc')return [['','Select cost centre'],['Pune Operations','Pune Operations'],['Bengaluru Operations','Bengaluru Operations'],['Retail – South','Retail – South'],['Retail – West','Retail – West'],['Delhi Corporate','Delhi Corporate']];
+ if(key==='bunit')return [['','Select business unit'],['Warehousing','Warehousing'],['Retail South','Retail South'],['Retail West','Retail West'],['Corporate','Corporate']];
+ if(key==='mcat')return [['','Select Mysa category']].concat(Object.values(MCAT).map(x=>[x,x]));
+ return [];
+}
 const ini=n=>n.replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const avB=k=>BLOGO[k]?`<span class="av2 lgb"><img src="${BLOGO[k]}"></span>`:`<span class="av2" style="background:${BL[k].c[0]};color:${BL[k].c[1]}">${k}</span>`;
 const avD=k=>BLOGO[k]?{html:`<img src="${BLOGO[k]}">`,style:'class="mp-av lgo"'}:{html:k,style:`style="background:${BL[k].c[0]};color:${BL[k].c[1]};border-color:${BL[k].c[0]};font-size:14px;font-weight:600"`};
@@ -1603,7 +1632,7 @@ function pageUB(){
   ['amount','Amount','0 0 120px','r',b=>inr(b.amt)],
   ['early','Early payment amt','0 0 140px','r',b=>b.early?inr(b.early):'—'],
   ['status','Status','0 0 140px','',b=>pl(...BST[b.status])],
-  ['pending',S.ubTab==='rej'?'Rejected by':'Pending with','0 0 160px','',b=>pendWith(b)],
+  ['pending',S.ubTab==='rej'?'Rejected by':'Pending with','1 1 160px','',b=>pendWith(b)],
   ['fetched','Fetched','0 0 100px','',b=>b.fetched.split(',')[0]],
   ['cc','Cost centre','0 0 150px','',b=>C(b).cc],
   ['bunit','Business unit','0 0 130px','',b=>C(b).bunit],
@@ -1611,7 +1640,7 @@ function pageUB(){
  const vis=DEF.filter(x=>S.ucols.has(x[0]));
  const showAct=S.ubTab!=='all';
  const colBtn=`<button class="colb" data-a="fmenu:colsub" title="Show or hide columns"><svg viewBox="0 0 16 16" fill="none"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7" stroke="#52525B" stroke-width="1.3" stroke-linecap="round"/><circle cx="10.5" cy="4.5" r="1.5" stroke="#52525B" stroke-width="1.3"/><circle cx="5.5" cy="11.5" r="1.5" stroke="#52525B" stroke-width="1.3"/></svg></button>`;
- const cols=[['Biller','1 1 220px'],...vis.map(x=>[x[1],x[2],x[3]]),showAct?[`Actions${colBtn}`,'0 0 120px','r']:[colBtn,'0 0 48px','r']];
+ const cols=[['Utility Vendor','0 0 230px'],...vis.map(x=>[x[1],x[2],x[3]]),showAct?[`Actions${colBtn}`,'0 0 120px','r']:[colBtn,'0 0 48px','r']];
  const amtIdx=1+vis.findIndex(x=>x[0]==='amount');
  const R=grouped('ub',rows,cols,amtIdx>0?amtIdx:-1,b=>b.amt,b=>{const c=cons(b.cons);
   return {id:b.id,kind:'bill',selectable:showAct&&((b.status==='pa'||b.status==='pr')&&b.on===ME),cells:[
@@ -1671,7 +1700,7 @@ function pageRTP(){
   table(cols,rows.map((r,i)=>({id:'r'+i,kind:'none',cells:[`<span class="nm2">${avN(r.e)}<span class="t">${r.e}</span></span>`,r.code,r.cat,r.sub,inr(r.amt),pl(r.st,'rtp'),`<div class="acts2">${ra('toast:Reimbursement actions','dots','More')}${rg('toast:Opens the existing reimbursement payment flow','Pay')}</div>`]})));
  }else{
   const rows=util.filter(b=>{const c=cons(b.cons);return (!S.f.rtp.over||dueIn(b.due)<0)&&qmatch('rtp',BL[c.b].n,c.nick,c.num,b.no)}).sort((a,b)=>d(a.due)-d(b.due));
-  const cols=[['Biller','1 1 220px'],['Consumer account','0 0 160px'],['Bill no.','0 0 140px'],['Due amount','0 0 130px','r'],['Due date','0 0 105px'],['Status','0 0 125px'],['Reviewed by','0 0 160px'],['Actions','0 0 96px','r']];
+  const cols=[['Utility Vendor','0 0 230px'],['Consumer account','0 0 160px'],['Bill no.','0 0 140px'],['Due amount','0 0 130px','r'],['Due date','0 0 105px'],['Status','0 0 125px'],['Reviewed by','1 1 160px'],['Actions','0 0 96px','r']];
   body=`<div class="fbar">${search('rtp','Search biller, consumer no. or bill no.')}<span class="flbl">Filters:</span>${chip('rtp','over','Overdue')}<span class="vsep"></span><button class="more">More Filters${IC.down.replace('<svg','<svg width="14" height="14"')}</button><div class="sortwrap"><button class="sortb">Sort &amp; Group by: <b>Due date</b>${IC.down.replace('<svg','<svg width="14" height="14"')}</button></div></div>`+
   sums([['Total count',rows.length],['Total due amount',inr(rows.reduce((s,b)=>s+b.amt,0))],['Utility Wallet balance',inr(acct('uw').bal),3]])+`<div class="acts"><button class="obtn">${IC.dl}Export</button></div></div>`+
   table(cols,rows.map(b=>{const c=cons(b.cons);return {id:b.id,kind:'bill',cells:[`<span class="nm2">${avB(c.b)}<span class="two"><span class="t">${BL[c.b].n}</span><small>${esc(c.nick)}</small></span></span>`,c.num,b.no,inr(b.amt),`<span class="${dueIn(b.due)<=2?'due':''}">${b.due}</span>`,pl('Ready to pay','rtp'),`<span class="two">${b.rvBy===ME?'You':b.rvBy}<small>${(b.rvOn||'').split(',')[0]}</small></span>`,`<div class="acts2">${ra('menu:bill:'+b.id,'dots','More')}${rg('paybill:'+b.id,'Create payment')}</div>`]}}),{empty:'No utility bills ready to pay',emptySub:'Bills appear here after finance review in Utility / Bills.'});
@@ -1754,7 +1783,7 @@ function drawerBill(b){
   ${F('Early payment amount',b.early?inr(b.early):'—')}${F('After due date',b.late?inr(b.late):'—')}
   ${F('Bill date',b.bd)}${F('Billing period',b.per)}</div></div>`+
   timeline(tag,'Utility Bill',steps,billEvents(b))+
-  `<p class="mp-h">Utility vendor</p><div class="mp-card mp-sum"><div class="mp-g">${F('Utility vendor',`<span class="lnk" data-a="opencons:${c.id}">${esc(c.nick)}</span>`)}${F('Consumer number',c.num+(c.bu?' · BU '+c.bu:''))}${F('Biller',bl.n+' · '+bl.cat)}${F('Branch',c.branch)}</div></div>`+
+  `<p class="mp-h">Utility vendor</p><div class="mp-card mp-sum"><div class="mp-g">${F('Utility vendor',`<span class="lnk" data-a="opencons:${c.id}">${esc(c.nick)}</span>`)}${F('Consumer number',c.num+paramLine(c))}${F('Biller',bl.n+' · '+bl.cat)}${F('Branch',c.branch)}</div></div>`+
   `<p class="mp-h">Tags &amp; accounting</p><div class="mp-card mp-sum"><div class="mp-g">${F('Branch',c.branch)}${F('Cost centre',c.cc)}${F('Business unit',c.bunit)}${F('Mysa category',MCAT[bl.cat])}${F('Expense category',c.exp)}${F('Pay from','Utility Wallet')}</div></div>`;
  }else if(tab==='c'){
   body=`<div style="margin-top:24px;border:1px solid #E4E4E7;border-radius:8px;padding:28px;background:#FAFAFA"><div style="background:#fff;border:1px solid #E4E4E7;border-radius:4px;padding:24px;font-size:13px;color:#52525B;line-height:20px"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:15px;color:#18181A">${bl.full}</b>${avB(c.b)}</div><div style="margin-top:14px">Consumer: ${esc(c.nick)} · ${c.num}</div><div>Bill no. ${b.no} · Bill date ${b.bd}</div><div>Billing period ${b.per}</div><div style="margin-top:14px;display:flex;justify-content:space-between;border-top:1px dashed #D4D4D7;padding-top:12px"><span>Amount payable by ${b.due}</span><b style="color:#18181A">${inr(b.amt)}</b></div><div style="margin-top:10px;font-size:12px;color:#A1A1AA">Bill copy fetched via Think Walnut (BBPS)</div></div></div><div style="margin-top:12px"><button class="obtn" data-a="toast:Bill copy downloaded">${IC.dl}Download PDF</button></div>`;
@@ -1803,7 +1832,7 @@ function drawerCons(c){
  let body='';
  if(tab==='d'){
   const callout=!c.active?`<div class="call i"><div class="grow">Inactive since ${c.inactOn}. Bills are no longer fetched for this account.</div></div>`:c.status==='failed'?`<div class="call e"><div class="grow"><b>Couldn’t verify with ${bl.n}.</b> The consumer number or billing unit doesn’t match the biller’s records.</div><button class="obtn" data-a="reverify:${c.id}">Retry</button></div>`:c.status==='verifying'?`<div class="call w"><div class="grow"><b>Verifying with ${bl.n}.</b> It becomes Active once the first bill is fetched, usually within a few hours.</div></div>`:'';
-  body=callout+`<div class="sect"><p>Utility vendor</p><span class="lnk" data-a="toast:Edit vendor details">Edit</span></div><div class="mp-card mp-sum"><div class="mp-g">${F('Biller',bl.full)}${F('Category',bl.cat)}${F('Consumer number',c.num)}${F('Billing unit (biller)',c.bu||'—')}${F('Meter type',c.meter)}${F('Connection type',c.conn)}${F('State',bl.st)}${F('Added on',c.added)}</div></div>
+  body=callout+`<div class="sect"><p>Utility vendor</p><span class="lnk" data-a="toast:Edit vendor details">Edit</span></div><div class="mp-card mp-sum"><div class="mp-g">${F('Biller',bl.full)}${F('Category',bl.cat)}${(c.params||[]).map(p=>F(p.name,p.value||'—')).join('')}${F('Meter type',c.meter)}${F('Connection type',c.conn)}${F('State',(!bl.st||bl.st==='ALL')?'All India':bl.st)}${F('Added on',c.added)}</div></div>
   <div class="mp-card" style="margin-top:12px"><div class="rowk" style="border-top:0"><div>Fetch bill copy<small>Attach the biller’s PDF to each bill</small></div><button class="tgx ${c.copy?'on':''}" data-a="copy:${c.id}"><i></i></button></div></div>
   <div class="sect"><p>Tagging</p><span class="lnk" data-a="toast:Edit tagging">Edit</span></div><div class="mp-card mp-sum"><div class="mp-g">${F('Branch',c.branch)}${F('Cost centre',c.cc)}${F('Business unit',c.bunit)}${F('Mysa category',MCAT[bl.cat])}</div></div><p class="mp-l" style="margin-top:8px">Bills fetched for this consumer inherit these tags.</p>
   <div class="sect"><p>Accounting</p></div><div class="mp-card mp-sum"><div class="mp-g">${F('Expense category',c.exp)}${F('Vendor in books',bl.n+' (Tally)')}${F('Pay from','Utility Wallet')}${F('Nickname',esc(c.nick))}</div></div>
@@ -1814,7 +1843,7 @@ function drawerCons(c){
   const all=BILLS.filter(b=>b.cons===c.id).sort((a,b)=>d(b.due)-d(a.due));
   body=`<div class="sect"><p>Bills</p></div><div class="mp-card blist">${all.length?all.map(b=>`<div class="bi" data-a="gobill:${b.id}"><div class="grow">${b.no}<small>${b.status==='paid'?'Paid '+b.paidOn.split(',')[0]:'Due '+b.due}</small></div>${pl(...BST[b.status])}<b style="font-weight:500;min-width:110px;text-align:right">${inr(b.amt)}</b></div>`).join(''):'<div class="bi" style="cursor:default;color:#71717A">No bills fetched yet.</div>'}</div>`;
  }
- return dHead(avD(c.b),esc(c.nick),`${bl.n} · ${c.num} <span class="tagl ${tag[1]}">${tag[0]}</span>`,`<button type="button" data-a="menu:cons:${c.id}">${IC.dots}</button>`)+
+ return dHead(avD(c.b),esc(c.nick),`${bl.n} · ${c.num} <span class="tagl ${tag[1]}">${tag[0]}</span>`,`${(c.active&&c.status==='active')?`<button type="button" class="g" data-a="fetchcons:${c.id}" title="Fetch latest bill">${IC.refresh}</button>`:''}<button type="button" data-a="menu:cons:${c.id}">${IC.dots}</button>`)+
  `<div class="kp"><div><b>${inr(due)}</b><small>Amount due</small></div><div><b>${inr(paid3)}</b><small>Paid in last 3 months</small></div></div>`+
  `<div class="mp-tabs">${[['d','Details'],['b','Bills']].map(([k,l])=>`<button class="${tab===k?'on':''}" data-dtab="${k}">${l}</button>`).join('')}</div><div class="mp-body">${body}</div>`;
 }
@@ -1826,7 +1855,7 @@ function billDoc(b){
  return `<div class="rvdoc"><div class="rvpaper">
   <div class="rvp-hd">${logo}<div style="text-align:right"><div class="rvp-bill">BILL</div><div class="rvp-no">${b.no}</div></div></div>
   <div class="rvp-rule"></div>
-  <div class="rvp-parties"><div><div class="rvp-lbl">Billed by</div><div class="rvp-v">${bl.full}</div><div class="rvp-s">Biller ID : ${c.num}${c.bu?' · BU '+c.bu:''}</div></div>
+  <div class="rvp-parties"><div><div class="rvp-lbl">Billed by</div><div class="rvp-v">${bl.full}</div><div class="rvp-s">Biller ID : ${c.num}${paramLine(c)}</div></div>
    <div><div class="rvp-lbl">Billed to</div><div class="rvp-v">Mysa Innovations Pvt Ltd</div><div class="rvp-s">Branch : ${c.branch}</div><div class="rvp-s">GSTIN : 29AAACP0165G3ZN</div></div></div>
   <div class="rvp-dates"><div><div class="rvp-lbl">Bill date</div><div class="rvp-v2">${b.bd}</div></div><div><div class="rvp-lbl">Due date</div><div class="rvp-v2">${b.due}</div></div><div><div class="rvp-lbl">Billing period</div><div class="rvp-v2">${b.per}</div></div></div>
   <table class="rvp-tbl"><thead><tr><th>#</th><th style="text-align:left">Item and description</th><th>Period</th><th style="text-align:right">Amount</th></tr></thead>
@@ -1846,7 +1875,7 @@ function reviewScreen(){
   body=`<div class="rvamt"><div class="rvamt-l">Requested Amount (incl. GST)</div><div class="rvamt-v">${inr(b.amt)}</div></div>
   <h4 class="rvh">Utility vendor</h4>
   <div class="rvg2">${field('Utility vendor',`${esc(c.nick)} <span class="verok">✓</span>`,1)}${field('Pay from','Utility Wallet',1)}</div>
-  <div class="rvtag">Biller ${bl.n} · ${bl.cat} · Consumer ${c.num}${c.bu?' · BU '+c.bu:''} <span class="lnk" data-a="opencons:${c.id}">${IC.ext.replace('<svg','<svg width="13" height="13"')}</span></div>
+  <div class="rvtag">Biller ${bl.n} · ${bl.cat} · Consumer ${c.num}${paramLine(c)} <span class="lnk" data-a="opencons:${c.id}">${IC.ext.replace('<svg','<svg width="13" height="13"')}</span></div>
   <h4 class="rvh">Bill summary</h4>
   <div class="rvg2">${field('Bill number',b.no,1)}${field('Billing period',b.per,1)}${field('Bill date',b.bd,1)}${field('Due date',b.due,1)}${field('Early payment amount',b.early?inr(b.early):'—',1)}${field('After due date',b.late?inr(b.late):'—',1)}</div>
   <h4 class="rvh">Tags &amp; categories</h4>
@@ -1893,21 +1922,26 @@ function modalPay(ids){
  <div class="mf"><button class="obtn" data-m="close">Cancel</button><button class="pr" data-m="paycreate">Create ${bs.length>1?bs.length+' payments':'payment'}</button></div>`;
 }
 function modalAdd(m){
- const bl=BL[m.b];
- const fld=(k,l,v,req,hint,full)=>`<div${full?' style="grid-column:1/-1"':''}><div class="fl ${m.err&&m.err[k]?'err':''}"><label>${l}${req?' <i>*</i>':''}</label><input data-af="${k}" value="${esc(v)}"></div>${hint?`<div class="fh">${hint}</div>`:''}</div>`;
- const sel=(k,l,v,opts,req,full)=>`<div${full?' style="grid-column:1/-1"':''}><div class="fl"><label>${l}${req?' <i>*</i>':''}</label><select data-af="${k}">${opts.map(o=>`<option ${o[0]===v?'selected':''} value="${o[0]}">${o[1]}</option>`).join('')}</select>${DDI}</div></div>`;
- const cats=[...new Set(Object.values(BL).map(x=>x.cat))].map(x=>[x,x]);
- const billers=Object.entries(BL).filter(([k,x])=>x.cat===m.cat).map(([k,x])=>[k,x.n+' – '+x.full]);
+ const bl=m.b?BL[m.b]:null;
+ const pv=m.pvals||{};
+ /* all three field helpers share the live app's floating-label geometry (.ff): the label rides as a placeholder and shrinks up once the field has a value; long values truncate with an ellipsis and carry a title tooltip. */
+ const fld=(k,l,v,req,full)=>`<div class="ff ffin${v?' filled':''}${m.err&&m.err[k]?' err':''}${full?' full':''}"><label>${l}${(!v&&req)?' <i>*</i>':''}</label><input data-af="${k}" value="${esc(v||'')}"></div>`;
+ const dd=(k,l,v,req,full)=>{const opts=ddOptions(k,m);const dis=(k==='b'&&!m.cat);const cur=v?opts.find(o=>o[0]===v):null;const val=cur?cur[1]:'';
+  return `<div class="ff${v?' filled':''}${dis?' dis':''}${m.err&&m.err[k]?' err':''}${full?' full':''}"${dis?'':` data-a="dd:${k}"`}${val?` title="${esc(val)}"`:''}><label>${l}${(!v&&req)?' <i>*</i>':''}</label><div class="ffv">${esc(val)}</div>${DDI.replace('class="dd"','class="ffchev"')}</div>`;};
+ /* read-only field — a utility vendor's state comes from sku_master, it is not chosen, so it shows filled and non-editable, and only when the vendor actually carries a state. */
+ const roFld=(l,v,full)=>`<div class="ff filled dis${full?' full':''}"><label>${l}</label><div class="ffv">${esc(v)}</div></div>`;
  const rad=(k,v,opts)=>`<div class="rg2">${opts.map(o=>`<label data-ar="${k}:${o}"><span class="rad ${v===o?'on':''}"></span>${o}</label>`).join('')}</div>`;
- const needsBU=m.b==='MS';
+ /* one field per biller param (sku_master's biller_param) — different vendors need different identifiers (BESCOM one; MSEDCL/DHBVN two; D VoiS one required + one optional). */
+ const params=bl?(bl.params||[]):[];
+ const paramFields=params.map(p=>fld('param:'+p.key,p.name,pv[p.key],!p.optional)).join('')+(params.length%2?'<div></div>':'');
+ const accountDetails=bl?`<h4>Account details</h4><div class="fg">${paramFields}</div>
+ <div class="fg" style="margin-top:20px;column-gap:48px"><div><div class="rgl">Meter type <i>*</i></div>${rad('meter',m.meter,['Postpaid','Prepaid','Smart'])}</div><div><div class="rgl">Connection type <i>*</i></div>${rad('conn',m.conn,['LT','HT'])}</div></div>`:'';
  return `<div class="mh">Add Utility Vendor<button type="button" data-m="close">${IC.x}</button></div><div class="mbd2">
- <h4>Biller</h4><div class="fg">${sel('cat','Category',m.cat,cats,1)}${sel('st','State',bl.st,[[bl.st,bl.st]],1)}${sel('b','Biller',m.b,billers.length?billers:[[m.b,bl.n]],1,1)}</div>
- <h4>Account details</h4><p class="hs">Fields required by ${bl.n}</p><div class="fg">${fld('num',needsBU?'Consumer number':'Consumer / account number',m.num,1,needsBU?'12 digits, printed at the top of the bill':'As printed on the bill')}${needsBU?fld('bu','Billing unit (BU)',m.bu,1,'4 digits'):'<div></div>'}</div>
- <div class="fg" style="margin-top:14px"><div><div class="mp-l" style="font-size:12px;color:#71717A">Meter type <i style="color:#DC2626;font-style:normal">*</i></div>${rad('meter',m.meter,['Postpaid','Prepaid','Smart'])}</div><div><div class="mp-l" style="font-size:12px;color:#71717A">Connection type <i style="color:#DC2626;font-style:normal">*</i></div>${rad('conn',m.conn,['LT','HT'])}</div></div>
- <h4>Tag to</h4><p class="hs">Bills fetched for this consumer inherit these tags.</p><div class="fg">${fld('nick','Nickname',m.nick,1)}${sel('branch','Branch',m.branch,[['Bengaluru','Bengaluru'],['Pune','Pune'],['Mumbai','Mumbai'],['Delhi','Delhi'],['Nashik','Nashik']],1)}${sel('cc','Cost centre',m.cc,[['Pune Operations','Pune Operations'],['Bengaluru Operations','Bengaluru Operations'],['Retail – South','Retail – South'],['Retail – West','Retail – West'],['Delhi Corporate','Delhi Corporate']],0)}${sel('bunit','Business unit',m.bunit,[['Warehousing','Warehousing'],['Retail South','Retail South'],['Retail West','Retail West'],['Corporate','Corporate']],0)}${sel('mcat','Mysa category',m.mcat,Object.values(MCAT).map(x=>[x,x]),0,1)}</div>
- <label class="ckl" data-a="addcopy">${cbx(m.copy,'')}Fetch bill copy from the biller</label>
- <div class="call i" style="margin-bottom:14px"><div class="grow">We’ll verify this account with ${bl.n}. It shows as <b>Verifying</b> until the first bill is fetched. Bills will be paid from the Utility Wallet.</div></div></div>
- <div class="mfl"><span class="lft">Adding many? <u data-a="toast:Bulk upload opens here">Bulk upload</u></span><button class="obtn" data-m="close">Cancel</button><button class="pr" data-m="addsave">Add Utility Vendor</button></div>`;
+ <h4>Utility Vendor</h4><div class="fg">${dd('cat','Category',m.cat,1)}${dd('b','Utility Vendor',m.b,1)}${(bl&&bl.st&&bl.st!=='ALL')?roFld('State',bl.st):''}</div>
+ ${accountDetails}
+ <h4>Additional Details</h4><div class="fg">${fld('nick','Nickname',m.nick,1)}${dd('branch','Branch',m.branch,1)}${dd('cc','Cost centre',m.cc,0)}${dd('bunit','Business unit',m.bunit,0)}${dd('mcat','Mysa category',m.mcat,0,1)}</div>
+ <label class="ckl" data-a="addcopy">${cbx(m.copy,'')}Fetch bill copy from the biller</label></div>
+ <div class="mfl"><span class="lft">Adding many? <u data-a="toast:Bulk upload opens here">Bulk upload</u></span><button class="obtn" data-m="close">Cancel</button><button class="pr" data-m="addsave"${bl?'':' disabled'}>Add Utility Vendor</button></div>`;
 }
 function modalConnect(m){
  const hdr=`<div class="mh">Connect Think Walnut<span style="margin-left:auto;margin-right:14px;font-size:14px;font-weight:500;color:#2563EB">Set up guide</span><button type="button" data-m="close" style="margin-left:0">${IC.x}</button></div><div class="prg"><div class="t">Step ${m.step} of 3</div><div class="bars">${[1,2,3].map(i=>`<i class="${i<=m.step?'on':''}"></i>`).join('')}</div></div>`;
@@ -1944,7 +1978,7 @@ function floater(){
 function menuHTML(m){
  const it=(a,l,cls='')=>`<button class="mi ${cls}" data-mi="${a}">${l}</button>`;
  if(m.k==='bill'){const b=bill(m.id);return (b.status==='pr'&&b.on===ME?it('review:'+b.id,'Review'):'')+it('openbill:'+b.id,'View details')+it('copy-dl:'+b.id,'Download bill copy')+it('opencons:'+b.cons,'View utility vendor')+(b.status==='rtp'?it('paybill:'+b.id,'Create payment'):'')+(b.status==='ip'?it('gopay:'+b.payId,'View payment'):'')}
- if(m.k==='cons'){const c=cons(m.id);return it('opencons:'+c.id,'View details')+(consDue(c).length?it('gounpaid:'+c.id,'View unpaid bills'):'')+it('toast:Edit consumer account','Edit')+(c.status==='failed'?it('reverify:'+c.id,'Retry verification'):'')+(c.active?it('cinact:'+c.id,'Mark as inactive','dn'):it('cact:'+c.id,'Mark as active'))}
+ if(m.k==='cons'){const c=cons(m.id);return (c.active&&c.status==='active'?it('fetchcons:'+c.id,'Fetch latest bill'):'')+it('opencons:'+c.id,'View details')+(consDue(c).length?it('gounpaid:'+c.id,'View unpaid bills'):'')+it('toast:Edit consumer account','Edit')+(c.status==='failed'?it('reverify:'+c.id,'Retry verification'):'')+(c.active?it('cinact:'+c.id,'Mark as inactive','dn'):it('cact:'+c.id,'Mark as active'))}
  if(m.k==='poo')return it('remind:'+m.id,'Send reminder')+it('openpay:'+m.id,'View details');
  if(m.k==='tx')return it('openpay:'+m.id,'View details')+it('toast:Receipt downloaded','Download receipt');
  if(m.k==='addsplit')return it('addcons','Add single vendor')+it('toast:Bulk upload opens here','Bulk upload (CSV)');
@@ -1954,6 +1988,7 @@ if(m.k==='fsortub'||m.k==='fsortca'){const p=m.k.slice(5),o=S.gs[p];const ck='<s
  if(m.k==='fcolsub'){const opts=[['billno','Bill no.'],['cnum','Consumer number'],['category','Category'],['branch','Branch'],['billdate','Bill date'],['period','Billing period'],['due','Due date'],['amount','Amount'],['early','Early payment amount'],['status','Status'],['pending','Pending with'],['fetched','Fetched'],['cc','Cost centre'],['bunit','Business unit'],['mcat','Mysa category']];
   return `<div class="mh2">Columns</div>`+opts.map(([k,l])=>`<button class="mi" data-mi="ucol:${k}">${cbx(S.ucols.has(k),'')}<span style="margin-left:10px">${l}</span></button>`).join('')+`<button class="mi" data-mi="ucol:reset" style="color:#2563EB">Reset to default</button>`}
  if(m.k==='fub'){return `<div class="mh2">Biller</div>`+Object.entries(BL).filter(([k])=>CONS.some(c=>c.b===k)).map(([k,x])=>`<button class="mi" data-mi="fcons-b:${k}">${x.n}</button>`).join('')}
+ if(m.k==='ddfield'){const opts=ddOptions(m.field,S.modal||{});const cur=S.modal?S.modal[m.field]:null;return opts.map((o,i)=>`<button class="mi ddopt${o[0]===cur?' sel':''}" data-mi="ddpick:${m.field}:${i}">${esc(o[1])}${o[0]===cur&&o[0]?'<svg class="ddtick" viewBox="0 0 16 16" fill="none"><path d="M13 4.5L6.5 11 3.5 8" stroke="#007466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</button>`).join('')}
  return '';
 }
 /* ---------- render ---------- */
@@ -1971,7 +2006,7 @@ function render(){
  $('#vBai').innerHTML=h;
  $('#abarL').innerHTML=floater();
  $('#modalL').innerHTML=S.modal?`<div class="scrim" data-m="bg"><div class="modal ${S.modal.kind==='add'?'mx':''}" style="${S.modal.kind==='add'?'width:560px':'width:600px'}">${S.modal.kind==='pay'?modalPay(S.modal.ids):S.modal.kind==='add'?modalAdd(S.modal):modalConnect(S.modal)}</div></div>`:'';
- $('#menuL').innerHTML=S.menu?`<div class="fmenu" style="left:${S.menu.x}px;top:${S.menu.y}px">${menuHTML(S.menu)}</div>`:'';
+ $('#menuL').innerHTML=S.menu?`<div class="fmenu" style="left:${S.menu.x}px;top:${S.menu.y}px${S.menu.w?`;width:${S.menu.w}px`:''}">${menuHTML(S.menu)}</div>`:'';
  if(fq){const i=document.querySelector(`[data-q="${fq}"]`);if(i){i.focus();i.setSelectionRange(pos,pos)}}
  if(fAdd){const i=document.querySelector(`[data-af="${fAdd}"]`);if(i&&i.setSelectionRange){i.focus();try{i.setSelectionRange(posA,posA)}catch(e){}}}
 }
@@ -2008,6 +2043,7 @@ function payGo(p){
 function payRej(p){p.status='rej';p.rjBy=ME;p.rjOn=nowStr();p.rjWhy='Rejected by approver';p.on=null;if(p.bill){const b=bill(p.bill);b.status='rtp';b.payId=null}toast(p.bill?'Payment rejected · bill returned to Ready To Pay':'Payment rejected')}
 function act(a,el){
  const [k,...rest]=a.split(':');const v=rest.join(':');
+ const wasOpenDD=k==='dd'&&S.menu&&S.menu.k==='ddfield'&&S.menu.field===v;
  S.menu=null;
  switch(k){
   case 'dclose':S.drawer=null;break;
@@ -2028,7 +2064,7 @@ function act(a,el){
   case 'gobill':{const b=bill(v);S.ubTab='all';S.uf={cons:null,unpaid:false};go('ub');S.drawer={kind:'bill',id:v,tab:'d',tl:false};break}
   case 'gopay':{const p=pay(v);const r=['appr','auth'].includes(p.status)?(p.on===ME?'pom':'poo'):'all';S.acct[r]=p.acct;if(r==='all')S.allTab=p.status==='rej'?'rej':'all';go(r);S.drawer={kind:'pay',id:v,tab:'d',tl:false};break}
   case 'uf':if(v==='all')S.uf={cons:null,unpaid:false};else S.uf[v]=v==='cons'?null:false;break;
-  case 'addcons':S.modal={kind:'add',cat:'Electricity',b:'MS',num:'170012345690',bu:'4637',meter:'Postpaid',conn:'LT',nick:'Chakan plant',branch:'Pune',cc:'Pune Operations',bunit:'Warehousing',mcat:'Utilities – Power',copy:true};break;
+  case 'addcons':S.modal={kind:'add',cat:'',b:'',pvals:{},meter:'',conn:'',nick:'',branch:'',cc:'',bunit:'',mcat:'',copy:false};break;
   case 'addcopy':S.modal.copy=!S.modal.copy;break;
   case 'copy':{const c=cons(v);c.copy=!c.copy;toast(c.copy?'Bill copy will be fetched':'Bill copy turned off');break}
   case 'cinact':{const c=cons(v);c.active=false;c.inactOn='28 Oct 26';toast(`${esc(c.nick)} marked inactive`);if(S.drawer&&S.drawer.id===v)S.drawer=null;break}
@@ -2037,6 +2073,16 @@ function act(a,el){
   case 'remind':toast('Reminder sent to '+pay(v).on);break;
   case 'copy-dl':toast('Bill copy downloaded');break;
   case 'fetch':toast('Fetched latest bills from Think Walnut · no new bills');break;
+  case 'fetchcons':{const c=cons(v);if(!c)break;const bl=BL[c.b];
+   if(!c.active){toast(`${esc(c.nick)} is inactive — bills aren’t fetched`,1);break}
+   if(c.status==='verifying'){toast(`${bl.n} is still verifying this account`,1);break}
+   if(c.status==='failed'){toast(`Couldn’t fetch — ${bl.n} hasn’t verified this account`,1);break}
+   toast(`Fetching latest bill from ${bl.n}…`);
+   const amt=Math.round((4000+Math.random()*80000)/10)*10;
+   const no=`${c.b}-2610-${Math.floor(1000+Math.random()*9000)}`;
+   const nid='u'+(BILLS.length+1+Math.floor(Math.random()*10000));
+   setTimeout(()=>{BILLS.unshift({id:nid,cons:c.id,no,bd:'28 Oct 26',per:'27 Sep – 26 Oct 26',due:'11 Nov 26',amt,early:null,late:Math.round(amt*1.02/10)*10,status:'pa',on:ME,fetched:nowStr()});toast(`Latest bill fetched · ${inr(amt)} due 11 Nov`);render();},1200);
+   break}
   case 'twconnect':S.modal={kind:'connect',step:1};break;
   case 'fcat':if(v==='clear')S.catSel.clear();else S.catSel.has(v)?S.catSel.delete(v):S.catSel.add(v);S.menu={...S._lastMenu};break;
   case 'fcons-b':{toast('Filtered to '+BL[v].n);S.q.ub=BL[v].n;break}
@@ -2044,6 +2090,8 @@ function act(a,el){
   case 'gs':{const [p,t,val]=v.split(':');S.gs[p][t]=val;S.coll.clear();break}
   case 'toast':toast(v);return;
   case 'menu':case 'fmenu':{const r=el.getBoundingClientRect();const [mk,mid]=k==='fmenu'?['f'+v,'']:[rest[0],rest.slice(1).join(':')];S.menu={k:mk,id:mid,x:Math.min(r.right-220,innerWidth-230),y:r.bottom+4};if(S.menu.x<210&&k==='fmenu')S.menu.x=r.left;S._lastMenu={...S.menu};break}
+  case 'dd':{if(!S.modal||wasOpenDD)break;const r=el.getBoundingClientRect();S.menu={k:'ddfield',field:v,x:Math.min(r.left,innerWidth-16-Math.max(r.width,220)),y:r.bottom+4,w:Math.max(r.width,220)};break}
+  case 'ddpick':{const i=v.lastIndexOf(':'),field=v.slice(0,i),idx=+v.slice(i+1);const opts=ddOptions(field,S.modal);const opt=opts[idx];if(opt)setModalField(field,opt[0]);break}
  }
  render();
 }
@@ -2051,15 +2099,19 @@ document.addEventListener('click',e=>{
  const t=e.target;
  // menu item
  const mi=t.closest('[data-mi]');if(mi){e.stopPropagation();const v=mi.dataset.mi;const keep=v.startsWith('fcat:')||v.startsWith('ucol:');act(v,mi);if(!keep&&S.menu)S.menu=null,render();return}
- if(!t.closest('.fmenu')&&S.menu&&!t.closest('[data-a^="menu:"],[data-a^="fmenu:"]')){S.menu=null;render()}
+ if(!t.closest('.fmenu')&&S.menu&&!t.closest('[data-a^="menu:"],[data-a^="fmenu:"],[data-a^="dd:"]')){S.menu=null;render()}
  const sec=t.closest('[data-sec]');if(sec){S.open[sec.dataset.sec]=!S.open[sec.dataset.sec];render();return}
  const nv=t.closest('[data-nav]');if(nv){go(nv.dataset.nav);return}
  if(t.dataset&&t.dataset.m==='bg'){S.modal=null;render();return}
  const m=t.closest('[data-m]:not([data-m="bg"])');if(m){const k=m.dataset.m;
   if(k==='close'){S.modal=null;render();return}
   if(k==='paycreate'){createPayments(S.modal.ids);render();return}
-  if(k==='addsave'){const M=S.modal;const err={};if(!M.num)err.num=1;if(M.b==='MS'&&!M.bu)err.bu=1;if(!M.nick)err.nick=1;if(Object.keys(err).length){M.err=err;render();return}
-   const id='c'+(CONS.length+1+Math.floor(Math.random()*1000));CONS.push({id,b:M.b,nick:M.nick,num:M.num,bu:M.b==='MS'?M.bu:null,branch:M.branch,status:'verifying',active:true,meter:M.meter,conn:M.conn,copy:M.copy,cc:M.cc,bunit:M.bunit,exp:BL[M.b].cat+' charges',added:'28 Oct 26'});
+  if(k==='addsave'){const M=S.modal;if(!M.b)return;const bl=BL[M.b];const pv=M.pvals||{};const err={};
+   (bl.params||[]).forEach(p=>{const v=(pv[p.key]||'').trim();if(!p.optional&&!v)err[p.key]=1;else if(v&&(v.length<p.min||v.length>p.max))err[p.key]=1});
+   if(!M.nick)err.nick=1;if(Object.keys(err).length){M.err=err;render();return}
+   const id='c'+(CONS.length+1+Math.floor(Math.random()*1000));
+   const params=(bl.params||[]).map(p=>({key:p.key,name:p.name,value:(pv[p.key]||'').trim()}));
+   CONS.push({id,b:M.b,nick:M.nick,num:params[0]?params[0].value:'',params,branch:M.branch,status:'verifying',active:true,meter:M.meter,conn:M.conn,copy:M.copy,cc:M.cc,bunit:M.bunit,exp:bl.cat+' charges',added:'28 Oct 26'});
    S.modal=null;S.caTab='active';S.drawer={kind:'cons',id,tab:'d',tl:false};toast(`Utility vendor added · verifying with ${BL[M.b].n}`);render();return}
   if(k==='c2'){S.modal.step=2;render();setTimeout(()=>{if(S.modal&&S.modal.kind==='connect'){S.modal.step=3;render()}},1400);return}
   if(k==='c1'){S.modal.step=1;render();return}
@@ -2089,9 +2141,18 @@ document.addEventListener('click',e=>{
  const gr=t.closest('[data-grp]');if(gr){const id=gr.dataset.grp;S.coll.has(id)?S.coll.delete(id):S.coll.add(id);render();return}
  const row=t.closest('[data-open]');if(row){const [kind,id]=row.dataset.open.split(':');if(kind==='none')return;openDrawer(kind,id);return}
 });
+/* routes a modal field edit: "param:<key>" goes into S.modal.pvals (the per-biller dynamic fields); switching category/biller clears pvals since a different biller needs different identifiers */
+function setModalField(af,val){
+ if(!S.modal)return;
+ if(af.indexOf('param:')===0){const pk=af.slice(6);S.modal.pvals=S.modal.pvals||{};S.modal.pvals[pk]=val;if(S.modal.err)delete S.modal.err[pk];return}
+ S.modal[af]=val;if(S.modal.err)delete S.modal.err[af];
+ /* category narrows the vendor list; the vendor itself carries the state (shown read-only after selection), so there is nothing to pre-filter and no field mapping until a vendor is actually chosen */
+ if(af==='cat'){S.modal.b='';S.modal.pvals={}}
+ if(af==='b')S.modal.pvals={};
+}
 document.addEventListener('input',e=>{const q=e.target.dataset.q;if(q){S.q[q]=e.target.value;S.sel.clear();render();return}
- const af=e.target.dataset.af;if(af&&S.modal){S.modal[af]=e.target.value;if(S.modal.err)delete S.modal.err[af];if(af==='cat'){const first=Object.entries(BL).find(([k,x])=>x.cat===e.target.value);if(first)S.modal.b=first[0]}render()}});
-document.addEventListener('change',e=>{const af=e.target.dataset.af;if(af&&S.modal&&e.target.tagName==='SELECT'){S.modal[af]=e.target.value;if(af==='cat'){const first=Object.entries(BL).find(([k,x])=>x.cat===e.target.value);if(first)S.modal.b=first[0]}render()}});
+ /* Modal text fields update state in place and only toggle the floating-label / error classes — NEVER a full modal re-render, which would destroy the <input> mid-keystroke and drop focus (that made the fields feel broken). */
+ const af=e.target.dataset.af;if(af&&S.modal){setModalField(af,e.target.value);const ff=e.target.closest('.ff');if(ff){ff.classList.toggle('filled',!!e.target.value);ff.classList.remove('err')}}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.menu)S.menu=null;else if(S.modal)S.modal=null;else if(S.drawer)S.drawer=null;else if(S.sel.size)S.sel.clear();render()}});
 render();
 
