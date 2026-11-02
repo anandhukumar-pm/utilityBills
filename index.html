@@ -94,6 +94,8 @@ svg{display:block}
 .tr.hd{background:var(--head)}
 .c{display:flex;align-items:center;padding:0 12px;border-right:1px solid var(--line);font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums}
 .c:last-child{border-right:none}
+/* Actions column pinned to the right during horizontal scroll (matches the dashboard's .w-act). background:inherit tracks row states — header grey, hover, selected, group. */
+#vBai .tw .tr>.c:last-child{position:sticky;right:0;z-index:2;background:inherit;border-left:1px solid var(--line)}
 .hd .c{font-size:12px;font-weight:500;color:var(--ink-2);text-transform:uppercase;gap:6px;letter-spacing:.01em}
 .hd .c svg{width:12px;height:12px;stroke:var(--muted)}
 .r{justify-content:flex-end}
@@ -1455,7 +1457,7 @@ const REIMB=[
 
 /* ===== Mysa Utility prototype app ===== */
 const S={route:'ub',open:{payments:true,utility:true,reports:false,settings:false},
- rtpTab:'utility',acct:{pom:'uw',poo:'uw'},allTab:'all',ubTab:'pa',caTab:'active',gs:{ub:{g:'none',s:'due'},ca:{g:'none',s:'name'}},coll:new Set(),ucols:new Set(['billno','due','amount','status','pending','fetched']),
+ rtpTab:'utility',acct:{pom:'uw',poo:'uw'},allTab:'all',ubTab:'pa',caTab:'active',gs:{ub:{g:'none',s:'due'},ca:{g:'none',s:'name'}},coll:new Set(),ucols:new Set(['biller','cnum','category','branch','billno','due','amount','status','pending','fetched','cc','mcat']),
  f:{ub:{},ca:{},pom:{},poo:{},all:{},rtp:{}},uf:{cons:null,unpaid:false},q:{},
  sel:new Set(),drawer:null,modal:null,menu:null,catSel:new Set(),twConnected:true};
 const $=s=>document.querySelector(s);
@@ -1622,6 +1624,7 @@ function pageUB(){
  const wk=rows.filter(b=>unpaid(b)&&dueWeek(b.due)).length;
  const C=b=>cons(b.cons);
  const DEF=[
+  ['biller','Biller','0 0 160px','',b=>BL[C(b).b].n],
   ['billno','Bill no.','0 0 130px','',b=>b.no],
   ['cnum','Consumer number','0 0 150px','',b=>C(b).num],
   ['category','Category','0 0 110px','',b=>BL[C(b).b].cat],
@@ -1632,7 +1635,7 @@ function pageUB(){
   ['amount','Amount','0 0 120px','r',b=>inr(b.amt)],
   ['early','Early payment amt','0 0 140px','r',b=>b.early?inr(b.early):'—'],
   ['status','Status','0 0 140px','',b=>pl(...BST[b.status])],
-  ['pending',S.ubTab==='rej'?'Rejected by':'Pending with','1 1 160px','',b=>pendWith(b)],
+  ['pending',S.ubTab==='rej'?'Rejected by':'Pending with','0 0 180px','',b=>pendWith(b)],
   ['fetched','Fetched','0 0 100px','',b=>b.fetched.split(',')[0]],
   ['cc','Cost centre','0 0 150px','',b=>C(b).cc],
   ['bunit','Business unit','0 0 130px','',b=>C(b).bunit],
@@ -1668,14 +1671,14 @@ function pageCA(){
  const due=rows.reduce((s,c)=>s+consDue(c).reduce((a,b)=>a+b.amt,0),0);
  const wk=rows.filter(c=>consDue(c).some(b=>dueWeek(b.due))).length;
  const attn=rows.filter(c=>c.status!=='active').length;
- const cols=[['Utility vendor','1 1 260px'],['Category','0 0 120px'],['Branch','0 0 120px'],['Status','0 0 150px'],['Amount due','0 0 170px','r'],['Next due','0 0 110px'],['Last paid','0 0 120px'],['Actions','0 0 96px','r']];
+ const cols=[['Utility vendor','0 0 260px'],['Category','0 0 120px'],['Branch','0 0 130px'],['Status','0 0 150px'],['Amount due','0 0 170px','r'],['Next due','0 0 120px'],['Last paid','0 0 120px'],['Consumer number','0 0 150px'],['Cost centre','0 0 150px'],['Business unit','0 0 130px'],['Mysa category','0 0 150px'],['Actions','0 0 96px','r']];
  const cdue=c=>consDue(c).reduce((a,b)=>a+b.amt,0), cnext=c=>{const x=consDue(c).sort((a,b)=>d(a.due)-d(b.due))[0];return x?d(x.due):d('31 Dec 99')};
  const so=S.gs.ca.s; rows.sort((a,b)=>so==='amt'?cdue(b)-cdue(a):so==='next'?cnext(a)-cnext(b):a.nick.localeCompare(b.nick));
  const R=grouped('ca',rows,cols,4,cdue,c=>{{const ub=consDue(c),amt=ub.reduce((a,b)=>a+b.amt,0),nx=ub.sort((a,b)=>d(a.due)-d(b.due))[0];
    const lp=BILLS.filter(b=>b.cons===c.id&&b.status==='paid').sort((a,b)=>d(b.due)-d(a.due))[0];
    return {id:c.id,kind:'cons',cells:[`<span class="nm2">${S.gs.ca.g==='biller'?'':avB(c.b)}<span class="two"><span class="t">${esc(c.nick)}</span><small>${S.gs.ca.g==='biller'?'':BL[c.b].n+' · '}${c.num}</small></span></span>`,BL[c.b].cat,c.branch,cStatus(c),
     amt?`<span class="lnk" data-a="gounpaid:${c.id}" title="View unpaid bills">${inr(amt)}${IC.ext.replace('<svg','<svg width="14" height="14"')}</span>`:'<span class="muted">₹0.00</span>',
-    nx?`<span class="${dueIn(nx.due)<=2?'due':''}">${nx.due}</span>`:'—',lp?lp.paidOn.split(',')[0]:'—',
+    nx?`<span class="${dueIn(nx.due)<=2?'due':''}">${nx.due}</span>`:'—',lp?lp.paidOn.split(',')[0]:'—',c.num,c.cc,c.bunit,MCAT[BL[c.b].cat],
     `<div class="acts2">${ra('menu:cons:'+c.id,'dots','More')}${rg('opencons:'+c.id,'View details')}</div>`]};}},'cons');
  const right=`<div class="split"><button class="pr" data-a="addcons">+ Add Utility Vendor</button><button class="pr2" data-a="menu:addsplit:x">${IC.down}</button></div>`;
  return backBar()+tabs([['active','Active',null],['inactive','Inactive',null]],S.caTab,'ca',right)+
@@ -1700,10 +1703,10 @@ function pageRTP(){
   table(cols,rows.map((r,i)=>({id:'r'+i,kind:'none',cells:[`<span class="nm2">${avN(r.e)}<span class="t">${r.e}</span></span>`,r.code,r.cat,r.sub,inr(r.amt),pl(r.st,'rtp'),`<div class="acts2">${ra('toast:Reimbursement actions','dots','More')}${rg('toast:Opens the existing reimbursement payment flow','Pay')}</div>`]})));
  }else{
   const rows=util.filter(b=>{const c=cons(b.cons);return (!S.f.rtp.over||dueIn(b.due)<0)&&qmatch('rtp',BL[c.b].n,c.nick,c.num,b.no)}).sort((a,b)=>d(a.due)-d(b.due));
-  const cols=[['Utility Vendor','0 0 230px'],['Consumer account','0 0 160px'],['Bill no.','0 0 140px'],['Due amount','0 0 130px','r'],['Due date','0 0 105px'],['Status','0 0 125px'],['Reviewed by','1 1 160px'],['Actions','0 0 96px','r']];
+  const cols=[['Utility Vendor','0 0 230px'],['Biller','0 0 160px'],['Consumer account','0 0 160px'],['Bill no.','0 0 140px'],['Billing period','0 0 150px'],['Due amount','0 0 130px','r'],['Due date','0 0 105px'],['Status','0 0 125px'],['Branch','0 0 120px'],['Cost centre','0 0 150px'],['Mysa category','0 0 150px'],['Reviewed by','0 0 180px'],['Actions','0 0 96px','r']];
   body=`<div class="fbar">${search('rtp','Search biller, consumer no. or bill no.')}<span class="flbl">Filters:</span>${chip('rtp','over','Overdue')}<span class="vsep"></span><button class="more">More Filters${IC.down.replace('<svg','<svg width="14" height="14"')}</button><div class="sortwrap"><button class="sortb">Sort &amp; Group by: <b>Due date</b>${IC.down.replace('<svg','<svg width="14" height="14"')}</button></div></div>`+
   sums([['Total count',rows.length],['Total due amount',inr(rows.reduce((s,b)=>s+b.amt,0))],['Utility Wallet balance',inr(acct('uw').bal),3]])+`<div class="acts"><button class="obtn">${IC.dl}Export</button></div></div>`+
-  table(cols,rows.map(b=>{const c=cons(b.cons);return {id:b.id,kind:'bill',cells:[`<span class="nm2">${avB(c.b)}<span class="two"><span class="t">${BL[c.b].n}</span><small>${esc(c.nick)}</small></span></span>`,c.num,b.no,inr(b.amt),`<span class="${dueIn(b.due)<=2?'due':''}">${b.due}</span>`,pl('Ready to pay','rtp'),`<span class="two">${b.rvBy===ME?'You':b.rvBy}<small>${(b.rvOn||'').split(',')[0]}</small></span>`,`<div class="acts2">${ra('menu:bill:'+b.id,'dots','More')}${rg('paybill:'+b.id,'Create payment')}</div>`]}}),{empty:'No utility bills ready to pay',emptySub:'Bills appear here after finance review in Utility / Bills.'});
+  table(cols,rows.map(b=>{const c=cons(b.cons);return {id:b.id,kind:'bill',cells:[`<span class="nm2">${avB(c.b)}<span class="two"><span class="t">${BL[c.b].n}</span><small>${esc(c.nick)}</small></span></span>`,BL[c.b].n,c.num,b.no,b.per,inr(b.amt),`<span class="${dueIn(b.due)<=2?'due':''}">${b.due}</span>`,pl('Ready to pay','rtp'),c.branch,c.cc,MCAT[BL[c.b].cat],`<span class="two">${b.rvBy===ME?'You':b.rvBy}<small>${(b.rvOn||'').split(',')[0]}</small></span>`,`<div class="acts2">${ra('menu:bill:'+b.id,'dots','More')}${rg('paybill:'+b.id,'Create payment')}</div>`]}}),{empty:'No utility bills ready to pay',emptySub:'Bills appear here after finance review in Utility / Bills.'});
  }
  return cardsRow(false)+tabs([['bills','Bills',VBILLS.length],['reimb','Reimbursements',REIMB.length],['utility','Utility Bills',util.length]],S.rtpTab,'rtp',`<div class="split"><button class="obtn" style="border-radius:4px 0 0 4px;height:36px">Direct Pay</button><button class="obtn" style="border-radius:0 4px 4px 0;height:36px;padding:0 8px;margin-left:-1px">${IC.down.replace('<svg','<svg width="14" height="14"')}</button></div>`)+body;
 }
@@ -1985,7 +1988,7 @@ function menuHTML(m){
  if(m.k==='fca'){const cats=[...new Set(CONS.map(c=>BL[c.b].cat))];return `<div class="mh2">Category</div>`+cats.map(c=>`<button class="mi" data-mi="fcat:${c}">${cbx(S.catSel.has(c),'')}<span style="margin-left:10px">${c}</span></button>`).join('')+(S.catSel.size?it('fcat:clear','Clear'):'')}
 if(m.k==='fsortub'||m.k==='fsortca'){const p=m.k.slice(5),o=S.gs[p];const ck='<svg viewBox="0 0 16 16" fill="none"><path d="M13 4.5L6.5 11 3.5 8" stroke="#18181A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   return `<div class="mh2">Group by</div>`+GS[p].g.map(([k,l])=>`<button class="mi ${o.g===k?'sel':''}" data-mi="gs:${p}:g:${k}">${l}${o.g===k?ck:''}</button>`).join('')+`<div class="mh2" style="border-top:1px solid #F4F4F5;margin-top:4px">Sort by</div>`+GS[p].s.map(([k,l])=>`<button class="mi ${o.s===k?'sel':''}" data-mi="gs:${p}:s:${k}">${l}${o.s===k?ck:''}</button>`).join('')}
- if(m.k==='fcolsub'){const opts=[['billno','Bill no.'],['cnum','Consumer number'],['category','Category'],['branch','Branch'],['billdate','Bill date'],['period','Billing period'],['due','Due date'],['amount','Amount'],['early','Early payment amount'],['status','Status'],['pending','Pending with'],['fetched','Fetched'],['cc','Cost centre'],['bunit','Business unit'],['mcat','Mysa category']];
+ if(m.k==='fcolsub'){const opts=[['biller','Biller'],['billno','Bill no.'],['cnum','Consumer number'],['category','Category'],['branch','Branch'],['billdate','Bill date'],['period','Billing period'],['due','Due date'],['amount','Amount'],['early','Early payment amount'],['status','Status'],['pending','Pending with'],['fetched','Fetched'],['cc','Cost centre'],['bunit','Business unit'],['mcat','Mysa category']];
   return `<div class="mh2">Columns</div>`+opts.map(([k,l])=>`<button class="mi" data-mi="ucol:${k}">${cbx(S.ucols.has(k),'')}<span style="margin-left:10px">${l}</span></button>`).join('')+`<button class="mi" data-mi="ucol:reset" style="color:#2563EB">Reset to default</button>`}
  if(m.k==='fub'){return `<div class="mh2">Biller</div>`+Object.entries(BL).filter(([k])=>CONS.some(c=>c.b===k)).map(([k,x])=>`<button class="mi" data-mi="fcons-b:${k}">${x.n}</button>`).join('')}
  if(m.k==='ddfield'){const opts=ddOptions(m.field,S.modal||{});const cur=S.modal?S.modal[m.field]:null;return opts.map((o,i)=>`<button class="mi ddopt${o[0]===cur?' sel':''}" data-mi="ddpick:${m.field}:${i}">${esc(o[1])}${o[0]===cur&&o[0]?'<svg class="ddtick" viewBox="0 0 16 16" fill="none"><path d="M13 4.5L6.5 11 3.5 8" stroke="#007466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</button>`).join('')}
@@ -2086,7 +2089,7 @@ function act(a,el){
   case 'twconnect':S.modal={kind:'connect',step:1};break;
   case 'fcat':if(v==='clear')S.catSel.clear();else S.catSel.has(v)?S.catSel.delete(v):S.catSel.add(v);S.menu={...S._lastMenu};break;
   case 'fcons-b':{toast('Filtered to '+BL[v].n);S.q.ub=BL[v].n;break}
-  case 'ucol':if(v==='reset')S.ucols=new Set(['billno','due','amount','status','pending','fetched']);else S.ucols.has(v)?S.ucols.delete(v):S.ucols.add(v);S.menu={...S._lastMenu};break;
+  case 'ucol':if(v==='reset')S.ucols=new Set(['biller','cnum','category','branch','billno','due','amount','status','pending','fetched','cc','mcat']);else S.ucols.has(v)?S.ucols.delete(v):S.ucols.add(v);S.menu={...S._lastMenu};break;
   case 'gs':{const [p,t,val]=v.split(':');S.gs[p][t]=val;S.coll.clear();break}
   case 'toast':toast(v);return;
   case 'menu':case 'fmenu':{const r=el.getBoundingClientRect();const [mk,mid]=k==='fmenu'?['f'+v,'']:[rest[0],rest.slice(1).join(':')];S.menu={k:mk,id:mid,x:Math.min(r.right-220,innerWidth-230),y:r.bottom+4};if(S.menu.x<210&&k==='fmenu')S.menu.x=r.left;S._lastMenu={...S.menu};break}
